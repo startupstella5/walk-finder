@@ -1,194 +1,899 @@
 <!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>November Step Challenge · Where should we walk?</title>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Walk Finder · November Step Challenge</title>
 <meta name="description" content="Find the fairest trail or park for the group to meet for a walk.">
+<meta name="theme-color" content="#fafaf8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-:root{--bg:#fbf6ef;--card:#fff;--ink:#3b2a20;--muted:#8a7464;--rust:#c2532b;--pumpkin:#e8833a;--gold:#e9b44c;--moss:#5f7a3a;--line:#eadfd2;--r:18px}
-*{box-sizing:border-box}html,body{margin:0}
-body{font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
-header{background:linear-gradient(135deg,#c2532b,#e8833a 60%,#e9b44c);color:#fff;padding:28px 18px 46px;position:relative;overflow:hidden}
-header h1{margin:0 0 6px;font-size:clamp(24px,6vw,38px);letter-spacing:-.02em}
-header p{margin:0;max-width:640px;opacity:.95}
-.leaves{position:absolute;right:10px;top:8px;font-size:34px;opacity:.85;animation:sway 4s ease-in-out infinite}
-@keyframes sway{50%{transform:rotate(12deg) translateY(4px)}}
-main{max-width:1100px;margin:-28px auto 40px;padding:0 12px;display:grid;gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:0 4px 18px #7a4a2014}
-h2{font-size:18px;margin:0 0 10px}
-.friend{display:grid;grid-template-columns:1fr;gap:8px;padding:12px;border:1px dashed var(--line);border-radius:14px;margin-bottom:10px;position:relative}
-.friend .row{display:flex;gap:8px;flex-wrap:wrap}
-input,select{font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fffdf9;color:var(--ink);width:100%;min-height:44px}
-input:focus,select:focus{outline:2px solid var(--pumpkin);border-color:transparent}
-.ac{position:relative}
-.sugg{position:absolute;z-index:1000;left:0;right:0;top:100%;background:#fff;border:1px solid var(--line);border-radius:12px;margin-top:4px;max-height:260px;overflow:auto;box-shadow:0 8px 24px #0002}
-.sugg div{padding:10px 12px;cursor:pointer;font-size:14px;border-bottom:1px solid #f3ece4}.sugg div:hover,.sugg div.on{background:#fdf0e3}
-.sugg small{color:var(--muted)}
-.where{font-size:13px;color:var(--moss)}
-button{font:inherit;border:0;border-radius:999px;padding:10px 16px;min-height:44px;cursor:pointer;background:#f3e6d8;color:var(--ink);font-weight:600;transition:transform .1s}
-button:active{transform:scale(.96)}button.primary{background:var(--rust);color:#fff}button.gold{background:var(--gold)}
-button.x{position:absolute;right:8px;top:8px;min-height:32px;padding:4px 10px;background:transparent;color:var(--muted)}
-.btns{display:flex;flex-wrap:wrap;gap:8px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:14px;min-height:38px;font-weight:500}
-.chip.on{background:var(--moss);color:#fff;border-color:var(--moss)}
-.label{font-size:13px;color:var(--muted);margin:10px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-#map{height:min(60vh,460px);border-radius:14px;z-index:0}
-.pick{background:linear-gradient(135deg,#fff4e6,#fde6cf);border-color:#f2c79c}
-.pick h3{margin:2px 0 6px;font-size:22px}
-.pill{display:inline-block;background:#fff;border-radius:999px;padding:3px 10px;font-size:13px;margin:2px 4px 2px 0;border:1px solid var(--line)}
-.dists{display:grid;gap:4px;margin:10px 0;font-size:14px}
-.list{display:grid;gap:10px}
-.spot{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:14px}
-.rank{width:32px;height:32px;border-radius:50%;background:#f3e6d8;display:grid;place-items:center;font-weight:700}
-.spot.top .rank{background:var(--rust);color:#fff}
-.spot .meta{font-size:13px;color:var(--muted)}
-a{color:var(--rust);font-weight:600}
-.note{font-size:13px;color:var(--muted)}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;opacity:0;transition:.3s;pointer-events:none;z-index:2000}
-.toast.show{opacity:1}
-@media(min-width:860px){main{grid-template-columns:380px 1fr}.span{grid-column:1/-1}#left{grid-row:span 3}}
-.home-ic{background:var(--gold);border:2px solid #fff;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font-size:15px;box-shadow:0 2px 6px #0004}
-.spot-ic{background:var(--moss);border:2px solid #fff;border-radius:50%;width:14px;height:14px;box-shadow:0 1px 4px #0004}
-.extra-ic{background:#9bb07a;border:2px solid #fff;border-radius:50%;width:11px;height:11px}
-.top-ic{background:var(--rust);border:3px solid #fff;border-radius:50%;width:34px;height:34px;display:grid;place-items:center;font-size:18px;box-shadow:0 3px 10px #0005}
-</style></head>
+:root {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --ink: #1a1a1a;
+  --ink-secondary: #4a4a4a;
+  --ink-muted: #717171;
+  --accent: #c45c3e;
+  --accent-hover: #a84d33;
+  --accent-subtle: #fdf6f4;
+  --border: #e5e5e5;
+  --border-light: #f0f0f0;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --transition: 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: var(--font); font-size: 15px; line-height: 1.6; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; }
+
+/* Header - clean, editorial */
+header {
+  padding: var(--space-xl) var(--space-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header h1 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin: 0 0 var(--space-sm);
+  color: var(--ink);
+}
+
+header p {
+  font-size: 1rem;
+  color: var(--ink-secondary);
+  margin: 0;
+  max-width: 540px;
+  line-height: 1.65;
+}
+
+/* Main layout */
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg) var(--space-3xl);
+  display: grid;
+  gap: var(--space-xl);
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+}
+
+.card-title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--space-md);
+}
+
+/* Friend entries */
+.friend {
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+  position: relative;
+  background: var(--surface);
+}
+
+.friend:last-child { margin-bottom: 0; }
+
+.friend-grid {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.friend-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+/* Inputs */
+input, select {
+  font-family: var(--font);
+  font-size: 0.9375rem;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  width: 100%;
+  height: 44px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+input::placeholder { color: var(--ink-muted); }
+input:hover, select:hover { border-color: #ccc; }
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-subtle); }
+
+/* Custom select with proper padding for chevron */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23717171'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+
+/* Autocomplete dropdown */
+.ac { position: relative; }
+
+.sugg {
+  position: absolute;
+  z-index: 100;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.sugg div {
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border-light);
+  transition: background var(--transition);
+}
+
+.sugg div:last-child { border-bottom: none; }
+.sugg div:hover { background: var(--accent-subtle); }
+.sugg small { color: var(--ink-muted); display: block; margin-top: 2px; font-size: 0.8125rem; }
+
+/* Status indicator */
+.status {
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  margin-top: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.status.ready { color: #2e7d32; }
+.status.ready .status-dot { background: #2e7d32; }
+
+/* Buttons */
+button {
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-md);
+  height: 44px;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--ink);
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+button:hover { background: var(--bg); border-color: #ccc; }
+button:active { transform: scale(0.98); }
+button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-subtle); border-color: var(--accent); }
+
+button.primary {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+
+button.primary:hover { background: #333; border-color: #333; }
+
+button.accent {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+button.accent:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+button.icon-btn {
+  position: absolute;
+  right: var(--space-sm);
+  top: var(--space-sm);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 1rem;
+}
+
+button.icon-btn:hover { color: var(--ink); background: var(--border-light); }
+
+button.loc-btn {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  min-width: 140px;
+}
+
+button.loc-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-group {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+/* Chips/filters */
+.filter-section { margin-top: var(--space-lg); }
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-sm);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.chip {
+  font-size: 0.8125rem;
+  font-weight: 450;
+  padding: var(--space-sm) var(--space-md);
+  height: 36px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.chip:hover { border-color: #ccc; background: var(--bg); }
+.chip.on { background: var(--ink); color: white; border-color: var(--ink); }
+
+/* Map - hero treatment */
+.map-section {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+#map {
+  height: 400px;
+  width: 100%;
+}
+
+.map-legend {
+  padding: var(--space-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  border-top: 1px solid var(--border-light);
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-dot.home { background: var(--accent); }
+.legend-dot.pick { background: var(--ink); }
+.legend-dot.spot { background: #6b7280; }
+
+/* Place card - the recommended spot */
+.place-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+}
+
+.place-card-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-sm);
+}
+
+.place-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-md);
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.place-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.tag {
+  font-size: 0.75rem;
+  font-weight: 450;
+  padding: 4px 10px;
+  background: var(--bg);
+  border-radius: 4px;
+  color: var(--ink-secondary);
+}
+
+.place-card-distances {
+  border-top: 1px solid var(--border-light);
+  padding-top: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.distance-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+  font-size: 0.875rem;
+}
+
+.distance-row .name { color: var(--ink-secondary); }
+.distance-row .dist { color: var(--ink); font-weight: 500; }
+
+.place-card-info {
+  font-size: 0.875rem;
+  color: var(--ink-secondary);
+  line-height: 1.6;
+  margin-top: var(--space-md);
+}
+
+.place-card-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+  color: var(--ink-muted);
+}
+
+.empty-state h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  margin: 0 0 var(--space-sm);
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* List results - clean rows */
+.results-section { margin-top: var(--space-xl); }
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-md);
+}
+
+.results-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+.results-subtitle {
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+
+.results-list {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.result-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: var(--space-md);
+  align-items: center;
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border-light);
+  transition: background var(--transition);
+}
+
+.result-row:last-child { border-bottom: none; }
+.result-row:hover { background: var(--bg); }
+
+.result-rank {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+.result-row.top .result-rank {
+  background: var(--ink);
+  color: white;
+}
+
+.result-info h4 {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  margin: 0 0 2px;
+  color: var(--ink);
+}
+
+.result-info .meta {
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+}
+
+.result-distance {
+  text-align: right;
+  font-size: 0.875rem;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+
+.result-link {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8125rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.result-link:hover { text-decoration: underline; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--ink);
+  color: white;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  opacity: 0;
+  transition: all 300ms ease;
+  z-index: 1000;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Note */
+.note {
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
+  margin-top: var(--space-md);
+}
+
+/* Links */
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Layout grid */
+@media (min-width: 860px) {
+  main {
+    grid-template-columns: 380px 1fr;
+    grid-template-rows: auto auto 1fr;
+  }
+  
+  .sidebar { grid-row: 1 / -1; }
+  .map-section { grid-column: 2; }
+  .place-card { grid-column: 2; }
+  .results-section { grid-column: 1 / -1; }
+  
+  #map { height: 480px; }
+}
+
+@media (max-width: 859px) {
+  header { padding: var(--space-lg) var(--space-md); }
+  main { padding: 0 var(--space-md) var(--space-2xl); }
+  
+  .friend-row { grid-template-columns: 1fr; }
+  .btn-group { flex-direction: column; }
+  .btn-group button { width: 100%; }
+  .place-card-actions { flex-direction: column; }
+  .place-card-actions button { width: 100%; }
+  .place-card-actions a { width: 100%; }
+  .place-card-actions a button { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  header h1 { font-size: 1.5rem; }
+  .card { padding: var(--space-md); }
+  .place-card { padding: var(--space-md); }
+  .place-card h3 { font-size: 1.25rem; }
+  .result-row { grid-template-columns: 32px 1fr; gap: var(--space-sm); }
+  .result-distance { grid-column: 2; font-size: 0.8125rem; }
+  .chip { font-size: 0.75rem; padding: 6px 12px; height: 32px; }
+}
+
+/* Map markers */
+.home-ic {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid white;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.spot-ic {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #6b7280;
+  border: 2px solid white;
+  box-shadow: var(--shadow-sm);
+}
+
+.extra-ic {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #9ca3af;
+  border: 2px solid white;
+}
+
+.top-ic {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid white;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+</style>
+</head>
 <body>
-<header><div class="leaves">🍂</div><h1>Where should we walk?</h1><p>November Step Challenge 🥾 Add the crew, and we'll find the fairest trail or park, where nobody drives much farther than anyone else.</p></header>
+<header>
+  <h1>Where should we walk?</h1>
+  <p>Add your group and we'll find a fair meeting spot—a trail or park where nobody drives much farther than anyone else.</p>
+</header>
+
 <main>
-<section class="card" id="left">
-  <h2>👟 Who's walking?</h2>
-  <div id="friends"></div>
-  <div class="btns"><button class="primary" id="add">+ Add a friend</button><button id="copy">🔗 Copy link</button></div>
-  <p class="note">Type any address or landmark, or pick a quick spot. Nothing is stored anywhere; the link holds the group.</p>
-  <div class="label">Type of spot</div>
-  <div class="chips" id="types"></div>
-  <div class="label">Vibe</div>
-  <div class="chips" id="vibes"></div>
-  <div class="label">Daily step goal</div>
-  <div class="chips" id="goals"></div>
-</section>
-<section class="card pick" id="pick"></section>
-<section class="card"><div id="map"></div><p class="note">🟡 homes · 🍁 fairest pick · green dots: our curated spots · small light dots: more parks nearby from OpenStreetMap</p></section>
-<section class="card span"><h2>🗺️ Every spot, fairest first</h2><p class="note">Ranked by the longest drive for anyone. Miles are straight-line; minutes are a rough 2.5 min/mile.</p><div class="list" id="list"></div></section>
-<section class="card span" id="extraCard" hidden><h2>🌳 More parks near the middle</h2><p class="note">Found live from OpenStreetMap. We haven't checked these, so take a look first.</p><div class="list" id="extra"></div></section>
+  <section class="card sidebar">
+    <div class="card-title">Your group</div>
+    <div id="friends"></div>
+    <div class="btn-group">
+      <button class="primary" id="add">Add a friend</button>
+      <button id="copy">Copy link</button>
+    </div>
+    <p class="note">The link holds your group—nothing is stored on any server.</p>
+    
+    <div class="filter-section">
+      <div class="filter-label">Type</div>
+      <div class="chips" id="types"></div>
+    </div>
+    
+    <div class="filter-section">
+      <div class="filter-label">Vibe</div>
+      <div class="chips" id="vibes"></div>
+    </div>
+    
+    <div class="filter-section">
+      <div class="filter-label">Step goal</div>
+      <div class="chips" id="goals"></div>
+    </div>
+  </section>
+
+  <section class="map-section">
+    <div id="map"></div>
+    <div class="map-legend">
+      <span class="map-legend-item"><span class="legend-dot home"></span> Starting points</span>
+      <span class="map-legend-item"><span class="legend-dot pick"></span> Recommended</span>
+      <span class="map-legend-item"><span class="legend-dot spot"></span> Other spots</span>
+    </div>
+  </section>
+
+  <section class="place-card" id="pick"></section>
+
+  <section class="results-section">
+    <div class="results-header">
+      <h2 class="results-title">All spots</h2>
+      <span class="results-subtitle">Sorted by fairest drive</span>
+    </div>
+    <div class="results-list" id="list"></div>
+  </section>
+
+  <section class="card" id="extraCard" hidden>
+    <div class="card-title">More parks nearby</div>
+    <p class="note" style="margin-top:0;margin-bottom:var(--space-md)">Found via OpenStreetMap—we haven't verified these.</p>
+    <div class="results-list" id="extra"></div>
+  </section>
 </main>
+
 <div class="toast" id="toast"></div>
+
 <script>
-const PRESETS=[["Glenview",42.0701,-87.8114],["Northbrook",42.1287,-87.8265],["Wilmette",42.0761,-87.7116],["Winnetka",42.1081,-87.7365],["Evanston",42.047,-87.6846],["Skokie",42.0263,-87.7521],["Highland Park",42.1837,-87.7993],["Deerfield",42.1711,-87.8445],["Lake Forest",42.2586,-87.8407],["Park Ridge",42.0112,-87.8406],["Des Plaines",42.0416,-87.8874],["Niles",42.0289,-87.8122],["Morton Grove",42.0406,-87.7826],["Northfield",42.0998,-87.7809],["Kenilworth",42.0895,-87.7149],["Glencoe",42.135,-87.7581],["Rogers Park (Chicago)",42.009,-87.6768],["Edgewater (Chicago)",41.9834,-87.664],["Andersonville (Chicago)",41.9799,-87.6683],["Lincoln Square (Chicago)",41.9686,-87.6885],["Ravenswood (Chicago)",41.9679,-87.6745],["Lakeview (Chicago)",41.9327,-87.668],["Lincoln Park (Chicago)",41.9217,-87.6478],["📍 The Glen Town Center, Glenview",42.0895,-87.8251],["📍 Glenview Metra",42.0749,-87.806],["📍 Lyon School, Glenview",42.0787,-87.797],["📍 Pleasant Ridge School, Glenview",42.0863,-87.7919],["📍 Glenbrook South HS",42.089,-87.8536],["📍 Glenbrook North HS",42.1119,-87.8337],["📍 Westfield Old Orchard",42.0591,-87.7498],["📍 Northbrook Court",42.1501,-87.8166],["📍 Northwestern University",42.0557,-87.6753],["📍 Evanston Township HS",42.0462,-87.7022],["📍 Bahá'í Temple, Wilmette",42.0744,-87.6843],["📍 Wilmette Metra",42.0774,-87.7093],["📍 New Trier HS, Winnetka",42.0945,-87.7198],["📍 Chicago Botanic Garden",42.1477,-87.7911]];
+const PRESETS=[["Glenview",42.0701,-87.8114],["Northbrook",42.1287,-87.8265],["Wilmette",42.0761,-87.7116],["Winnetka",42.1081,-87.7365],["Evanston",42.047,-87.6846],["Skokie",42.0263,-87.7521],["Highland Park",42.1837,-87.7993],["Deerfield",42.1711,-87.8445],["Lake Forest",42.2586,-87.8407],["Park Ridge",42.0112,-87.8406],["Des Plaines",42.0416,-87.8874],["Niles",42.0289,-87.8122],["Morton Grove",42.0406,-87.7826],["Northfield",42.0998,-87.7809],["Kenilworth",42.0895,-87.7149],["Glencoe",42.135,-87.7581],["Rogers Park",42.009,-87.6768],["Edgewater",41.9834,-87.664],["Andersonville",41.9799,-87.6683],["Lincoln Square",41.9686,-87.6885],["Ravenswood",41.9679,-87.6745],["Lakeview",41.9327,-87.668],["Lincoln Park",41.9217,-87.6478],["The Glen",42.0895,-87.8251],["Glenview Metra",42.0749,-87.806],["Old Orchard",42.0591,-87.7498],["Northbrook Court",42.1501,-87.8166],["Northwestern",42.0557,-87.6753],["Botanic Garden",42.1477,-87.7911]];
 const S=(name,town,type,lat,lng,o={})=>({name,town,type,lat,lng,vibes:[],...o});
 const SPOTS=[
-S("Gallery Park (Lake Glenview)","Glenview","Park",42.0918,-87.8196,{loop:1.5,loopName:"Lake Loop",surface:"Paved",vibes:["Lake views","Stroller-friendly","Dog-friendly","Coffee nearby"],note:"142 acres around Lake Glenview, 1.8 mi of paths; leashed dogs OK.",parking:"Lot off Patriot Blvd."}),
-S("Kent Fuller Air Station Prairie","Glenview","Nature preserve",42.1012,-87.8196,{loop:1,loopName:"prairie paths",vibes:["Quiet nature"],note:"32-acre tallgrass prairie remnant with a 1-mile path system."}),
-S("Glenview Park Center","Glenview","Park",42.0888,-87.8176,{surface:"Paved",vibes:["Restrooms","Coffee nearby","Stroller-friendly"],note:"Next to Gallery Park and The Glen."}),
-S("Historic Wagner Farm","Glenview","Park",42.0821,-87.7822,{vibes:["Stroller-friendly"],note:"Working historic farm, fun with kids."}),
-S("North Branch Trail at Harms Woods","Glenview","Trail",42.0621,-87.7748,{surface:"Paved",vibes:["Quiet nature","Dog-friendly","Stroller-friendly"],note:"Part of the ~20-mile paved North Branch Trail; go out and back."}),
+S("Gallery Park","Glenview","Park",42.0918,-87.8196,{loop:1.5,loopName:"Lake Loop",surface:"Paved",vibes:["Lake views","Stroller-friendly","Dog-friendly","Coffee nearby"],note:"142 acres around Lake Glenview with 1.8 mi of paths.",parking:"Lot off Patriot Blvd"}),
+S("Air Station Prairie","Glenview","Nature preserve",42.1012,-87.8196,{loop:1,loopName:"prairie paths",vibes:["Quiet nature"],note:"32-acre tallgrass prairie with a 1-mile path system."}),
+S("Glenview Park Center","Glenview","Park",42.0888,-87.8176,{surface:"Paved",vibes:["Restrooms","Coffee nearby","Stroller-friendly"],note:"Adjacent to Gallery Park and The Glen."}),
+S("Wagner Farm","Glenview","Park",42.0821,-87.7822,{vibes:["Stroller-friendly"],note:"Working historic farm, great with kids."}),
+S("Harms Woods","Glenview","Trail",42.0621,-87.7748,{surface:"Paved",vibes:["Quiet nature","Dog-friendly","Stroller-friendly"],note:"Part of the 20-mile North Branch Trail."}),
 S("Watersmeet Woods","Glenview","Nature preserve",42.0871,-87.7746,{vibes:["Quiet nature","Dog-friendly"]}),
-S("Blue Star Memorial Woods","Glenview","Nature preserve",42.0743,-87.774,{vibes:["Quiet nature","Dog-friendly"]}),
+S("Blue Star Woods","Glenview","Nature preserve",42.0743,-87.774,{vibes:["Quiet nature","Dog-friendly"]}),
 S("Linne Woods","Morton Grove","Nature preserve",42.0485,-87.7837,{vibes:["Quiet nature","Dog-friendly"]}),
-S("Skokie Lagoons","Winnetka","Nature preserve",42.1028,-87.7612,{surface:"Paved",vibes:["Lake views","Quiet nature","Dog-friendly"],note:"The North Branch Trail runs alongside the lagoons."}),
+S("Skokie Lagoons","Winnetka","Nature preserve",42.1028,-87.7612,{surface:"Paved",vibes:["Lake views","Quiet nature","Dog-friendly"],note:"North Branch Trail runs alongside."}),
 S("Erickson Woods","Winnetka","Nature preserve",42.1087,-87.7682,{vibes:["Quiet nature","Dog-friendly"]}),
-S("Chicago Botanic Garden","Glencoe","Park",42.1477,-87.7911,{surface:"Paved",vibes:["Lake views","Restrooms","Coffee nearby","Stroller-friendly"],note:"385 acres; free admission, paid parking. No pets.",parking:"Paid lot at main entrance"}),
+S("Botanic Garden","Glencoe","Park",42.1477,-87.7911,{surface:"Paved",vibes:["Lake views","Restrooms","Coffee nearby","Stroller-friendly"],note:"385 acres, free admission, paid parking.",parking:"Main entrance"}),
 S("Turnbull Woods","Glencoe","Nature preserve",42.1495,-87.773,{vibes:["Quiet nature","Dog-friendly"]}),
-S("Green Bay Trail","Glencoe","Trail",42.1523,-87.772,{vibes:["Coffee nearby","Dog-friendly"],note:"Follows the Metra line through the North Shore towns."}),
+S("Green Bay Trail","Glencoe","Trail",42.1523,-87.772,{vibes:["Coffee nearby","Dog-friendly"],note:"Follows the Metra line through North Shore towns."}),
 S("Glencoe Beach","Glencoe","Lakefront",42.1389,-87.7497,{vibes:["Lake views"]}),
-S("Somme Prairie Grove","Northbrook","Nature preserve",42.1384,-87.826,{surface:"Dirt",vibes:["Quiet nature"]}),
+S("Somme Prairie","Northbrook","Nature preserve",42.1384,-87.826,{surface:"Dirt",vibes:["Quiet nature"]}),
 S("Techny Prairie","Northbrook","Park",42.1192,-87.8181,{vibes:["Quiet nature"]}),
-S("Gillson Park","Wilmette","Lakefront",42.0787,-87.6852,{surface:"Paved",vibes:["Lake views","Stroller-friendly","Restrooms"],note:"Big lakefront park by the Bahá'í Temple."}),
+S("Gillson Park","Wilmette","Lakefront",42.0787,-87.6852,{surface:"Paved",vibes:["Lake views","Stroller-friendly","Restrooms"],note:"Lakefront park near the Bahá'í Temple."}),
 S("Lighthouse Beach","Evanston","Lakefront",42.0646,-87.6747,{vibes:["Lake views"],note:"Grosse Point Lighthouse next door."}),
-S("Evanston Lakefront Path (Dawes Park)","Evanston","Lakefront",42.044,-87.6724,{surface:"Paved",vibes:["Lake views","Coffee nearby","Stroller-friendly","Dog-friendly"],note:"Downtown Evanston coffee a few blocks west."}),
+S("Dawes Park","Evanston","Lakefront",42.044,-87.6724,{surface:"Paved",vibes:["Lake views","Coffee nearby","Stroller-friendly","Dog-friendly"],note:"Downtown Evanston nearby."}),
 S("Lovelace Park","Evanston","Park",42.0678,-87.7266,{vibes:["Stroller-friendly"]}),
 S("Perkins Woods","Evanston","Nature preserve",42.0596,-87.7119,{vibes:["Quiet nature"]}),
 S("Rosewood Beach","Highland Park","Lakefront",42.1675,-87.7693,{vibes:["Lake views"]}),
 S("Heller Nature Center","Highland Park","Nature preserve",42.2059,-87.8424,{vibes:["Quiet nature"]}),
-S("Ryerson Conservation Area","Riverwoods","Nature preserve",42.1774,-87.9119,{vibes:["Quiet nature"],note:"Woods along the Des Plaines River."}),
+S("Ryerson Woods","Riverwoods","Nature preserve",42.1774,-87.9119,{vibes:["Quiet nature"],note:"Woods along the Des Plaines River."}),
 S("Middlefork Savanna","Lake Forest","Nature preserve",42.2588,-87.8873,{vibes:["Quiet nature"]}),
 S("Forest Park Beach","Lake Forest","Lakefront",42.2536,-87.8197,{vibes:["Lake views"]}),
-S("Independence Grove","Libertyville","Park",42.3303,-87.9535,{loop:2.3,loopName:"Lakeside Trail Loop",surface:"Gravel",vibes:["Lake views","Restrooms"],note:"7.5 mi of trails around a 129-acre lake; Overlook Loop (2.5 mi) is paved."}),
-S("Lake Avenue Woods (Des Plaines River Trail)","Glenview","Trail",42.0897,-87.8822,{vibes:["Quiet nature","Dog-friendly"]}),
+S("Independence Grove","Libertyville","Park",42.3303,-87.9535,{loop:2.3,loopName:"Lakeside Trail",surface:"Gravel",vibes:["Lake views","Restrooms"],note:"7.5 mi of trails around a 129-acre lake."}),
+S("Lake Ave Woods","Glenview","Trail",42.0897,-87.8822,{vibes:["Quiet nature","Dog-friendly"]}),
 S("Allison Woods","Prospect Heights","Nature preserve",42.1048,-87.8836,{vibes:["Quiet nature","Dog-friendly"]}),
-S("Edgebrook Woods (North Branch Trail)","Chicago","Trail",41.9914,-87.765,{surface:"Paved",vibes:["Quiet nature","Dog-friendly","Stroller-friendly"]}),
+S("Edgebrook Woods","Chicago","Trail",41.9914,-87.765,{surface:"Paved",vibes:["Quiet nature","Dog-friendly","Stroller-friendly"]}),
 S("LaBagh Woods","Chicago","Nature preserve",41.9775,-87.7479,{vibes:["Quiet nature"]}),
 S("Loyola Park","Chicago","Lakefront",42.0095,-87.6594,{surface:"Paved",vibes:["Lake views","Stroller-friendly"]}),
-S("Montrose Point Bird Sanctuary","Chicago","Nature preserve",41.963,-87.6332,{vibes:["Lake views","Quiet nature"]})];
+S("Montrose Point","Chicago","Nature preserve",41.963,-87.6332,{vibes:["Lake views","Quiet nature"]})];
 const VIBES=["Lake views","Coffee nearby","Stroller-friendly","Restrooms","Dog-friendly","Quiet nature","Paved"];
 const TYPES=["All","Trail","Park","Lakefront","Nature preserve"];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const mi=(a,b,c,d)=>{const R=3958.8,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
-const fmt=m=>`${m.toFixed(1)} mi · ~${Math.round(m*2.5)} min`;
+const fmt=m=>`${m.toFixed(1)} mi`;
+const fmtFull=m=>`${m.toFixed(1)} mi · ~${Math.round(m*2.5)} min`;
 const maps=(n,t)=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(n+" "+t+" IL");
 const dir=(lat,lng)=>`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 let st={friends:[{name:"Stella",place:"Glenview",lat:42.0701,lng:-87.8114},{name:"",place:"",lat:null,lng:null},{name:"",place:"",lat:null,lng:null}],type:"All",vibes:[],goal:10000,surprise:null};
+
 function loadHash(){try{const h=location.hash.slice(1);if(!h)return;const p=new URLSearchParams(h);const g=p.get("g");if(g){const f=JSON.parse(decodeURIComponent(escape(atob(g.replace(/-/g,"+").replace(/_/g,"/")))));if(Array.isArray(f)&&f.length)st.friends=f.map(x=>({name:x[0]||"",place:x[1]||"",lat:x[2]??null,lng:x[3]??null}));}}catch(e){console.warn("bad hash",e)}}
+
 function saveHash(){const g=btoa(unescape(encodeURIComponent(JSON.stringify(st.friends.map(f=>[f.name,f.place,f.lat==null?null:+f.lat.toFixed(4),f.lng==null?null:+f.lng.toFixed(4)]))))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");history.replaceState(null,"","#g="+g)}
-function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),1800)}
-// geocoding
+
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2000)}
+
 const cache={};let geoT;
 async function geocode(q){q=q.trim();if(q.length<3)return[];if(cache[q])return cache[q];
- const pre=PRESETS.filter(p=>p[0].toLowerCase().includes(q.toLowerCase())).slice(0,4).map(p=>({label:p[0].replace("📍 ",""),sub:"Quick pick",lat:p[1],lng:p[2]}));
- let res=[];try{const r=await fetch("https://photon.komoot.io/api/?limit=6&lat=42.08&lon=-87.78&q="+encodeURIComponent(q));const j=await r.json();res=j.features.map(f=>{const p=f.properties;return{label:p.name||[p.housenumber,p.street].filter(Boolean).join(" "),sub:[p.housenumber&&p.name?null:null,p.street&&p.name?p.street:null,p.city||p.county,p.state].filter(Boolean).join(", "),lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]}});}catch(e){
+ const pre=PRESETS.filter(p=>p[0].toLowerCase().includes(q.toLowerCase())).slice(0,4).map(p=>({label:p[0],sub:"Quick pick",lat:p[1],lng:p[2]}));
+ let res=[];try{const r=await fetch("https://photon.komoot.io/api/?limit=6&lat=42.08&lon=-87.78&q="+encodeURIComponent(q));const j=await r.json();res=j.features.map(f=>{const p=f.properties;return{label:p.name||[p.housenumber,p.street].filter(Boolean).join(" "),sub:[p.street&&p.name?p.street:null,p.city||p.county,p.state].filter(Boolean).join(", "),lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]}});}catch(e){
   try{const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&viewbox=-88.2,42.4,-87.5,41.8&q="+encodeURIComponent(q));const j=await r.json();res=j.map(x=>({label:x.display_name.split(",")[0],sub:x.display_name.split(",").slice(1,4).join(","),lat:+x.lat,lng:+x.lon}));}catch(e2){}}
  return cache[q]=[...pre,...res];}
+
 function renderFriends(){const box=$("#friends");box.innerHTML="";
  st.friends.forEach((f,i)=>{const d=document.createElement("div");d.className="friend";
-  d.innerHTML=`${st.friends.length>1?'<button class="x" title="Remove">✕</button>':""}
-  <input class="nm" placeholder="Name (e.g. ${["Stella","Jess","Priya","Maya","Dana"][i%5]})" value="${esc(f.name)}" aria-label="Name">
-  <div class="ac"><input class="pl" placeholder="Address, town or landmark…" value="${esc(f.place)}" aria-label="Where from" autocomplete="off"><div class="sugg" hidden></div></div>
-  <div class="row"><select class="qp" aria-label="Quick pick"><option value="">⚡ Quick pick a town or landmark</option>${PRESETS.map((p,k)=>`<option value="${k}">${esc(p[0])}</option>`).join("")}</select><button class="loc">📍 Use my location</button></div>
-  <div class="where">${f.lat!=null?"✓ Got it: "+esc(f.place||"your spot"):"Pick a place so we can do the math"}</div>`;
+  const hasLoc=f.lat!=null;
+  const statusClass=hasLoc?"status ready":"status";
+  const statusText=hasLoc?`Set: ${esc(f.place||"your location")}`:"Enter a location";
+  d.innerHTML=`${st.friends.length>1?'<button class="icon-btn" type="button" aria-label="Remove">×</button>':''}
+    <div class="friend-grid">
+      <input class="nm" type="text" placeholder="Name" value="${esc(f.name)}" aria-label="Name">
+      <div class="ac"><input class="pl" type="text" placeholder="Address or town" value="${esc(f.place)}" aria-label="Location" autocomplete="off"><div class="sugg" hidden></div></div>
+      <div class="friend-row">
+        <select class="qp" aria-label="Quick pick"><option value="">Quick pick</option>${PRESETS.map((p,k)=>`<option value="${k}">${esc(p[0])}</option>`).join("")}</select>
+        <button type="button" class="loc-btn">📍 My location</button>
+      </div>
+      <div class="${statusClass}"><span class="status-dot"></span>${statusText}</div>
+    </div>`;
   const pl=d.querySelector(".pl"),sg=d.querySelector(".sugg");
   d.querySelector(".nm").oninput=e=>{f.name=e.target.value;saveHash();renderResults()};
-  d.querySelector(".x")?.addEventListener("click",()=>{st.friends.splice(i,1);saveHash();renderFriends();renderResults()});
-  d.querySelector(".qp").onchange=e=>{const p=PRESETS[e.target.value];if(!p)return;Object.assign(f,{place:p[0].replace("📍 ",""),lat:p[1],lng:p[2]});st.surprise=null;saveHash();renderFriends();renderResults()};
-  d.querySelector(".loc").onclick=()=>{if(!navigator.geolocation)return toast("Location isn't available here");toast("Finding you…");navigator.geolocation.getCurrentPosition(p=>{Object.assign(f,{place:"My location",lat:p.coords.latitude,lng:p.coords.longitude});saveHash();renderFriends();renderResults()},()=>toast("Couldn't get your location"))};
-  let items=[];pl.oninput=()=>{clearTimeout(geoT);const q=pl.value;geoT=setTimeout(async()=>{items=await geocode(q);if(pl.value!==q)return;sg.innerHTML=items.map((it,k)=>`<div data-k="${k}">${esc(it.label)}<br><small>${esc(it.sub||"")}</small></div>`).join("");sg.hidden=!items.length},350)};
+  d.querySelector(".icon-btn")?.addEventListener("click",()=>{st.friends.splice(i,1);saveHash();renderFriends();renderResults()});
+  d.querySelector(".qp").onchange=e=>{const p=PRESETS[e.target.value];if(!p)return;Object.assign(f,{place:p[0],lat:p[1],lng:p[2]});st.surprise=null;saveHash();renderFriends();renderResults()};
+  d.querySelector(".loc-btn").onclick=()=>{if(!navigator.geolocation)return toast("Location not available");toast("Finding you…");navigator.geolocation.getCurrentPosition(p=>{Object.assign(f,{place:"My location",lat:p.coords.latitude,lng:p.coords.longitude});saveHash();renderFriends();renderResults()},()=>toast("Couldn't get location"))};
+  let items=[];
+  pl.oninput=()=>{clearTimeout(geoT);const q=pl.value;geoT=setTimeout(async()=>{items=await geocode(q);if(pl.value!==q)return;sg.innerHTML=items.map((it,k)=>`<div data-k="${k}">${esc(it.label)}<small>${esc(it.sub||"")}</small></div>`).join("");sg.hidden=!items.length},350)};
   pl.onkeydown=e=>{if(e.key==="Enter"&&items[0]){e.preventDefault();choose(items[0])}};
   const choose=it=>{Object.assign(f,{place:it.label,lat:it.lat,lng:it.lng});st.surprise=null;saveHash();renderFriends();renderResults()};
   sg.onmousedown=e=>{const t=e.target.closest("[data-k]");if(t){e.preventDefault();choose(items[+t.dataset.k])}};
   pl.onblur=()=>setTimeout(()=>sg.hidden=true,150);
   box.appendChild(d)})}
+
 function chips(){
- $("#types").innerHTML=TYPES.map(t=>`<button class="chip ${st.type===t?"on":""}" data-t="${t}">${t}</button>`).join("");
- $("#vibes").innerHTML=VIBES.map(v=>`<button class="chip ${st.vibes.includes(v)?"on":""}" data-v="${v}">${v}</button>`).join("");
- $("#goals").innerHTML=[5000,10000,15000].map(g=>`<button class="chip ${st.goal===g?"on":""}" data-g="${g}">${g/1000}k steps</button>`).join("");}
+ $("#types").innerHTML=TYPES.map(t=>`<button type="button" class="chip ${st.type===t?"on":""}" data-t="${t}">${t}</button>`).join("");
+ $("#vibes").innerHTML=VIBES.map(v=>`<button type="button" class="chip ${st.vibes.includes(v)?"on":""}" data-v="${v}">${v}</button>`).join("");
+ $("#goals").innerHTML=[5000,10000,15000].map(g=>`<button type="button" class="chip ${st.goal===g?"on":""}" data-g="${g}">${g/1000}k</button>`).join("");}
+
 document.addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;if(c.dataset.t)st.type=c.dataset.t;if(c.dataset.v){const v=c.dataset.v;st.vibes=st.vibes.includes(v)?st.vibes.filter(x=>x!==v):[...st.vibes,v]}if(c.dataset.g)st.goal=+c.dataset.g;if(!c.dataset.g)st.surprise=null;chips();renderResults()});
+
 const located=()=>st.friends.filter(f=>f.lat!=null);
 function ranked(){const fr=located();return SPOTS.filter(s=>st.type==="All"||s.type===st.type).filter(s=>st.vibes.every(v=>v==="Paved"?s.surface==="Paved":s.vibes.includes(v))).map(s=>{const d=fr.map(f=>mi(f.lat,f.lng,s.lat,s.lng));return{s,d,max:Math.max(...d),avg:d.reduce((a,b)=>a+b,0)/d.length}}).sort((a,b)=>a.max-b.max||a.avg-b.avg)}
-const stepLine=s=>{const m=st.goal/2000;return s.loop?`${m} miles = ${Math.ceil(m/s.loop*10)/10} laps of the ${s.loop}-mi ${s.loopName}`:`${m} miles gets you ${st.goal.toLocaleString()} steps`};
+const stepLine=s=>{const m=st.goal/2000;return s.loop?`${m} mi = ${Math.ceil(m/s.loop*10)/10} laps of the ${s.loop}-mi ${s.loopName}`:`${m} mi for ${st.goal.toLocaleString()} steps`};
+
 let map,layer;
 function initMap(){map=L.map("map",{scrollWheelZoom:false}).setView([42.08,-87.78],11);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(map);layer=L.layerGroup().addTo(map)}
 const icon=(c,h="")=>L.divIcon({className:"",html:`<div class="${c}">${h}</div>`,iconSize:null});
+
 function renderResults(){const fr=located(),R=fr.length?ranked():[];
  let top=R[0];if(st.surprise){const f=R.find(r=>r.s.name===st.surprise);if(f)top=f}
  const pk=$("#pick");
- if(!fr.length)pk.innerHTML=`<h2>🍁 Your pick will appear here</h2><p>Add where at least one walker is coming from.</p>`;
- else if(!top)pk.innerHTML=`<h2>😅 Too picky!</h2><p>No spot matches all those filters. Turn a vibe or two off.</p>`;
- else{const s=top.s;pk.innerHTML=`<div class="note">${st.surprise?"🎲 Surprise pick!":"🏆 Fairest spot for the group"}</div><h3>Let's walk at ${esc(s.name)}!</h3>
- <div><span class="pill">${esc(s.town)}</span><span class="pill">${s.type}</span>${s.surface?`<span class="pill">${s.surface}</span>`:""}${s.vibes.map(v=>`<span class="pill">${v}</span>`).join("")}</div>
- <div class="dists">${fr.map((f,i)=>`<div>👟 <b>${esc(f.name||"Friend "+(st.friends.indexOf(f)+1))}</b> · ${fmt(top.d[i])}</div>`).join("")}</div>
- <p>🎯 ${stepLine(s)} (2,000 steps a mile).${s.note?" "+esc(s.note):""}${s.parking?" 🅿️ "+esc(s.parking)+".":""}</p>
- <div class="btns"><a href="${dir(s.lat,s.lng)}" target="_blank" rel="noopener"><button class="primary">🧭 Directions</button></a><button class="gold" id="surp">🎲 Surprise me</button></div>`;
- $("#surp").onclick=()=>{const pool=R.slice(0,8).filter(r=>r.s.name!==top.s.name);if(!pool.length)return;st.surprise=pool[Math.floor(Math.random()*pool.length)].s.name;renderResults()}}
- $("#list").innerHTML=R.map((r,i)=>`<div class="spot ${r===top?"top":""}"><div class="rank">${i+1}</div><div><b>${esc(r.s.name)}</b> <span class="meta">· ${esc(r.s.town)} · ${r.s.type}${r.s.surface?" · "+r.s.surface:""}</span><div class="meta">Longest drive ${fmt(r.max)} · avg ${r.avg.toFixed(1)} mi · ${r.s.loop?Math.ceil(st.goal/2000/r.s.loop*10)/10+" laps":st.goal/2000+" mi"} for ${st.goal/1000}k</div><a href="${maps(r.s.name,r.s.town)}" target="_blank" rel="noopener">Open in Google Maps →</a></div></div>`).join("")||`<p class="note">Add a walker to see the ranking.</p>`;
+ 
+ if(!fr.length){
+   pk.innerHTML=`<div class="empty-state"><h3>Add your starting points</h3><p>Enter locations above to find the fairest meeting spot.</p></div>`;
+ } else if(!top){
+   pk.innerHTML=`<div class="empty-state"><h3>No matches</h3><p>No spots match your filters. Try removing some.</p></div>`;
+ } else {
+   const s=top.s;
+   pk.innerHTML=`
+     <div class="place-card-label">${st.surprise?"Surprise pick":"Recommended"}</div>
+     <h3>${esc(s.name)}</h3>
+     <div class="place-card-meta">
+       <span class="tag">${esc(s.town)}</span>
+       <span class="tag">${s.type}</span>
+       ${s.surface?`<span class="tag">${s.surface}</span>`:""}
+       ${s.vibes.slice(0,3).map(v=>`<span class="tag">${v}</span>`).join("")}
+     </div>
+     <div class="place-card-distances">
+       ${fr.map((f,i)=>`<div class="distance-row"><span class="name">${esc(f.name||"Friend "+(i+1))}</span><span class="dist">${fmtFull(top.d[i])}</span></div>`).join("")}
+     </div>
+     <div class="place-card-info">
+       ${stepLine(s)}${s.note?" · "+esc(s.note):""}${s.parking?" · Parking: "+esc(s.parking):""}
+     </div>
+     <div class="place-card-actions">
+       <a href="${dir(s.lat,s.lng)}" target="_blank" rel="noopener"><button class="accent">Get directions</button></a>
+       <button id="surp">Surprise me</button>
+     </div>`;
+   $("#surp").onclick=()=>{const pool=R.slice(0,8).filter(r=>r.s.name!==top.s.name);if(!pool.length)return;st.surprise=pool[Math.floor(Math.random()*pool.length)].s.name;renderResults()};
+ }
+
+ $("#list").innerHTML=R.length?R.map((r,i)=>`
+   <div class="result-row ${r===top?"top":""}">
+     <div class="result-rank">${i+1}</div>
+     <div class="result-info">
+       <h4>${esc(r.s.name)}</h4>
+       <span class="meta">${esc(r.s.town)} · ${r.s.type}${r.s.surface?" · "+r.s.surface:""}</span>
+       <a class="result-link" href="${maps(r.s.name,r.s.town)}" target="_blank" rel="noopener">View on Maps →</a>
+     </div>
+     <div class="result-distance">
+       <div>${fmt(r.max)} max</div>
+       <div style="color:var(--ink-muted);font-size:0.8125rem">${fmt(r.avg)} avg</div>
+     </div>
+   </div>`).join(""):`<div class="empty-state"><p>Add locations to see results.</p></div>`;
+
  if(!map)return;layer.clearLayers();const b=[];
- R.forEach(r=>{if(r===top)return;L.marker([r.s.lat,r.s.lng],{icon:icon("spot-ic")}).bindPopup(`<b>${esc(r.s.name)}</b><br>Longest drive ${fmt(r.max)}`).addTo(layer)});
+ R.forEach(r=>{if(r===top)return;L.marker([r.s.lat,r.s.lng],{icon:icon("spot-ic")}).bindPopup(`<b>${esc(r.s.name)}</b><br>${fmt(r.max)} max`).addTo(layer)});
  fr.forEach(f=>{L.marker([f.lat,f.lng],{icon:icon("home-ic","🏠")}).bindPopup(esc(f.name||"Friend")+": "+esc(f.place)).addTo(layer);b.push([f.lat,f.lng])});
- if(top){L.marker([top.s.lat,top.s.lng],{icon:icon("top-ic","🍁"),zIndexOffset:1000}).bindPopup(`<b>${esc(top.s.name)}</b>`).addTo(layer);b.push([top.s.lat,top.s.lng]);fr.forEach(f=>L.polyline([[f.lat,f.lng],[top.s.lat,top.s.lng]],{color:"#c2532b",weight:2,dashArray:"6 6",opacity:.7}).addTo(layer))}
- if(b.length)map.fitBounds(b,{padding:[40,40],maxZoom:13});
+ if(top){L.marker([top.s.lat,top.s.lng],{icon:icon("top-ic","📍"),zIndexOffset:1000}).bindPopup(`<b>${esc(top.s.name)}</b>`).addTo(layer);b.push([top.s.lat,top.s.lng]);fr.forEach(f=>L.polyline([[f.lat,f.lng],[top.s.lat,top.s.lng]],{color:"var(--ink)",weight:1.5,dashArray:"4 4",opacity:.5}).addTo(layer))}
+ if(b.length)map.fitBounds(b,{padding:[50,50],maxZoom:13});
  fetchExtra(fr)}
-let extraKey="";async function fetchExtra(fr){if(!fr.length)return;const lat=fr.reduce((a,f)=>a+f.lat,0)/fr.length,lng=fr.reduce((a,f)=>a+f.lng,0)/fr.length,key=lat.toFixed(3)+","+lng.toFixed(3);if(key===extraKey)return;extraKey=key;
+
+let extraKey="";
+async function fetchExtra(fr){if(!fr.length)return;const lat=fr.reduce((a,f)=>a+f.lat,0)/fr.length,lng=fr.reduce((a,f)=>a+f.lng,0)/fr.length,key=lat.toFixed(3)+","+lng.toFixed(3);if(key===extraKey)return;extraKey=key;
  const q=`[out:json][timeout:15];(way["leisure"~"park|nature_reserve"]["name"](around:6000,${lat},${lng});relation["leisure"~"park|nature_reserve"]["name"](around:6000,${lat},${lng}););out center 40;`;
  try{let j=null;for(const ep of["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"]){try{const r=await fetch(ep,{method:"POST",body:"data="+encodeURIComponent(q)});if(r.ok){j=await r.json();break}}catch(e){}}if(!j)throw 0;if(key!==extraKey)return;
   const known=new Set(SPOTS.map(s=>s.name.toLowerCase()));const seen=new Set();
-  const ex=j.elements.map(e=>({name:e.tags.name,lat:e.center?.lat,lng:e.center?.lon,kind:e.tags.leisure==="nature_reserve"?"Nature reserve":"Park"})).filter(e=>e.lat&&!seen.has(e.name)&&seen.add(e.name)&&![...known].some(k=>k.includes(e.name.toLowerCase())))
-   .map(e=>({...e,max:Math.max(...located().map(f=>mi(f.lat,f.lng,e.lat,e.lng)))})).sort((a,b)=>a.max-b.max).slice(0,12);
+  const ex=j.elements.map(e=>({name:e.tags.name,lat:e.center?.lat,lng:e.center?.lon,kind:e.tags.leisure==="nature_reserve"?"Nature preserve":"Park"})).filter(e=>e.lat&&!seen.has(e.name)&&seen.add(e.name)&&![...known].some(k=>k.includes(e.name.toLowerCase())))
+   .map(e=>({...e,max:Math.max(...located().map(f=>mi(f.lat,f.lng,e.lat,e.lng)))})).sort((a,b)=>a.max-b.max).slice(0,10);
   if(!ex.length)return;$("#extraCard").hidden=false;
-  $("#extra").innerHTML=ex.map(e=>`<div class="spot"><div class="rank">🌳</div><div><b>${esc(e.name)}</b> <span class="meta">· ${e.kind}</span><div class="meta">Longest drive ${fmt(e.max)}</div><a href="${dir(e.lat,e.lng)}" target="_blank" rel="noopener">Directions →</a></div></div>`).join("");
+  $("#extra").innerHTML=ex.map(e=>`<div class="result-row"><div class="result-rank">·</div><div class="result-info"><h4>${esc(e.name)}</h4><span class="meta">${e.kind}</span><a class="result-link" href="${dir(e.lat,e.lng)}" target="_blank">Directions →</a></div><div class="result-distance">${fmt(e.max)}</div></div>`).join("");
   ex.forEach(e=>L.marker([e.lat,e.lng],{icon:icon("extra-ic")}).bindPopup(esc(e.name)).addTo(layer));
  }catch(e){$("#extraCard").hidden=true}}
+
 $("#add").onclick=()=>{st.friends.push({name:"",place:"",lat:null,lng:null});saveHash();renderFriends();setTimeout(()=>[...document.querySelectorAll(".nm")].pop().focus(),0)};
-$("#copy").onclick=async()=>{saveHash();try{await navigator.clipboard.writeText(location.href);toast("Link copied! Send it to the crew 🍂")}catch(e){prompt("Copy this link:",location.href)}};
+$("#copy").onclick=async()=>{saveHash();try{await navigator.clipboard.writeText(location.href);toast("Link copied")}catch(e){prompt("Copy this link:",location.href)}};
+
 loadHash();chips();renderFriends();try{initMap()}catch(e){console.warn("map failed",e)}saveHash();renderResults();
-</script></body></html>
+</script>
+</body>
+</html>
