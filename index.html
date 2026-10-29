@@ -1,80 +1,814 @@
 <!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>November Step Challenge · Where should we walk?</title>
 <meta name="description" content="Find the fairest trail or park for the group to meet for a walk.">
+<meta name="theme-color" content="#c24b2b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-:root{--bg:#fbf6ef;--card:#fff;--ink:#3b2a20;--muted:#8a7464;--rust:#c2532b;--pumpkin:#e8833a;--gold:#e9b44c;--moss:#5f7a3a;--line:#eadfd2;--r:18px}
-*{box-sizing:border-box}html,body{margin:0}
-body{font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
-header{background:linear-gradient(135deg,#c2532b,#e8833a 60%,#e9b44c);color:#fff;padding:28px 18px 46px;position:relative;overflow:hidden}
-header h1{margin:0 0 6px;font-size:clamp(24px,6vw,38px);letter-spacing:-.02em}
-header p{margin:0;max-width:640px;opacity:.95}
-.leaves{position:absolute;right:10px;top:8px;font-size:34px;opacity:.85;animation:sway 4s ease-in-out infinite}
-@keyframes sway{50%{transform:rotate(12deg) translateY(4px)}}
-main{max-width:1100px;margin:-28px auto 40px;padding:0 12px;display:grid;gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:0 4px 18px #7a4a2014}
-h2{font-size:18px;margin:0 0 10px}
-.friend{display:grid;grid-template-columns:1fr;gap:8px;padding:12px;border:1px dashed var(--line);border-radius:14px;margin-bottom:10px;position:relative}
-.friend .row{display:flex;gap:8px;flex-wrap:wrap}
-input,select{font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fffdf9;color:var(--ink);width:100%;min-height:44px}
-input:focus,select:focus{outline:2px solid var(--pumpkin);border-color:transparent}
-.ac{position:relative}
-.sugg{position:absolute;z-index:1000;left:0;right:0;top:100%;background:#fff;border:1px solid var(--line);border-radius:12px;margin-top:4px;max-height:260px;overflow:auto;box-shadow:0 8px 24px #0002}
-.sugg div{padding:10px 12px;cursor:pointer;font-size:14px;border-bottom:1px solid #f3ece4}.sugg div:hover,.sugg div.on{background:#fdf0e3}
-.sugg small{color:var(--muted)}
-.where{font-size:13px;color:var(--moss)}
-button{font:inherit;border:0;border-radius:999px;padding:10px 16px;min-height:44px;cursor:pointer;background:#f3e6d8;color:var(--ink);font-weight:600;transition:transform .1s}
-button:active{transform:scale(.96)}button.primary{background:var(--rust);color:#fff}button.gold{background:var(--gold)}
-button.x{position:absolute;right:8px;top:8px;min-height:32px;padding:4px 10px;background:transparent;color:var(--muted)}
-.btns{display:flex;flex-wrap:wrap;gap:8px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:14px;min-height:38px;font-weight:500}
-.chip.on{background:var(--moss);color:#fff;border-color:var(--moss)}
-.label{font-size:13px;color:var(--muted);margin:10px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-#map{height:min(60vh,460px);border-radius:14px;z-index:0}
-.pick{background:linear-gradient(135deg,#fff4e6,#fde6cf);border-color:#f2c79c}
-.pick h3{margin:2px 0 6px;font-size:22px}
-.pill{display:inline-block;background:#fff;border-radius:999px;padding:3px 10px;font-size:13px;margin:2px 4px 2px 0;border:1px solid var(--line)}
-.dists{display:grid;gap:4px;margin:10px 0;font-size:14px}
-.list{display:grid;gap:10px}
-.spot{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:14px}
-.rank{width:32px;height:32px;border-radius:50%;background:#f3e6d8;display:grid;place-items:center;font-weight:700}
-.spot.top .rank{background:var(--rust);color:#fff}
-.spot .meta{font-size:13px;color:var(--muted)}
-a{color:var(--rust);font-weight:600}
-.note{font-size:13px;color:var(--muted)}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;opacity:0;transition:.3s;pointer-events:none;z-index:2000}
-.toast.show{opacity:1}
-@media(min-width:860px){main{grid-template-columns:380px 1fr}.span{grid-column:1/-1}#left{grid-row:span 3}}
-.home-ic{background:var(--gold);border:2px solid #fff;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font-size:15px;box-shadow:0 2px 6px #0004}
-.spot-ic{background:var(--moss);border:2px solid #fff;border-radius:50%;width:14px;height:14px;box-shadow:0 1px 4px #0004}
-.extra-ic{background:#9bb07a;border:2px solid #fff;border-radius:50%;width:11px;height:11px}
-.top-ic{background:var(--rust);border:3px solid #fff;border-radius:50%;width:34px;height:34px;display:grid;place-items:center;font-size:18px;box-shadow:0 3px 10px #0005}
-</style></head>
+:root {
+  --bg: #faf8f5;
+  --card: #ffffff;
+  --ink: #2d2014;
+  --ink-secondary: #5c4a3d;
+  --muted: #8a7a6c;
+  --rust: #c24b2b;
+  --rust-hover: #a83f22;
+  --rust-light: #fef3f0;
+  --pumpkin: #e07830;
+  --gold: #daa520;
+  --gold-hover: #c9940e;
+  --gold-light: #fdf8e8;
+  --moss: #4a7c3a;
+  --moss-hover: #3d6830;
+  --moss-light: #f0f7ed;
+  --line: #e8e0d8;
+  --line-light: #f2ece6;
+  --shadow-sm: 0 1px 3px rgba(45, 32, 20, 0.06);
+  --shadow-md: 0 4px 12px rgba(45, 32, 20, 0.08);
+  --shadow-lg: 0 8px 24px rgba(45, 32, 20, 0.12);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+header {
+  background: linear-gradient(135deg, #c24b2b 0%, #e07830 50%, #daa520 100%);
+  color: #fff;
+  padding: 32px 20px 52px;
+  position: relative;
+  overflow: hidden;
+}
+
+header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+header h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+header p {
+  margin: 0;
+  max-width: 580px;
+  opacity: 0.95;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.leaves {
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  font-size: 2.25rem;
+  opacity: 0.9;
+  animation: sway 4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(12deg) translateY(4px); }
+}
+
+main {
+  max-width: 1140px;
+  margin: -32px auto 48px;
+  padding: 0 16px;
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+  transition: box-shadow var(--transition-base);
+}
+
+h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.friend {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 16px;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  position: relative;
+  background: var(--line-light);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.friend:hover {
+  border-color: var(--pumpkin);
+  background: rgba(224, 120, 48, 0.04);
+}
+
+.friend:focus-within {
+  border-color: var(--pumpkin);
+  border-style: solid;
+  background: rgba(224, 120, 48, 0.06);
+}
+
+.friend .row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+input, select {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  padding: 12px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--ink);
+  width: 100%;
+  min-height: 48px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+input:hover, select:hover {
+  border-color: #d0c4b8;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--pumpkin);
+  box-shadow: 0 0 0 3px rgba(224, 120, 48, 0.15);
+  background: #fff;
+}
+
+input:disabled, select:disabled {
+  background: var(--line-light);
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.ac { position: relative; }
+
+.sugg {
+  position: absolute;
+  z-index: 1000;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  max-height: 280px;
+  overflow: auto;
+  box-shadow: var(--shadow-lg);
+  animation: slideDown var(--transition-fast);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sugg div {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--line-light);
+  transition: background var(--transition-fast);
+  line-height: 1.4;
+}
+
+.sugg div:last-child { border-bottom: none; }
+
+.sugg div:hover, .sugg div.on {
+  background: var(--rust-light);
+}
+
+.sugg small {
+  color: var(--muted);
+  display: block;
+  margin-top: 2px;
+}
+
+.where {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.where.ready {
+  color: var(--moss);
+}
+
+.where.ready::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--moss);
+  flex-shrink: 0;
+}
+
+.where.pending {
+  color: var(--muted);
+}
+
+.where.pending::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+button {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 12px 20px;
+  min-height: 44px;
+  cursor: pointer;
+  background: var(--line-light);
+  color: var(--ink);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+button:hover {
+  background: var(--line);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: scale(0.97) translateY(0);
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(194, 75, 43, 0.3);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+button.primary {
+  background: var(--rust);
+  color: #fff;
+}
+
+button.primary:hover {
+  background: var(--rust-hover);
+}
+
+button.gold {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+button.gold:hover {
+  background: var(--gold-hover);
+}
+
+button.x {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  min-height: 32px;
+  min-width: 32px;
+  padding: 4px;
+  background: transparent;
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+}
+
+button.x:hover {
+  background: rgba(194, 75, 43, 0.1);
+  color: var(--rust);
+}
+
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  font-size: 0.8125rem;
+  min-height: 36px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.chip:hover:not(.on) {
+  border-color: var(--moss);
+  background: var(--moss-light);
+}
+
+.chip.on {
+  background: var(--moss);
+  color: #fff;
+  border-color: var(--moss);
+}
+
+.chip.on:hover {
+  background: var(--moss-hover);
+  border-color: var(--moss-hover);
+}
+
+.label {
+  font-size: 0.6875rem;
+  color: var(--muted);
+  margin: 20px 0 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+#map {
+  height: min(60vh, 480px);
+  border-radius: var(--radius-lg);
+  z-index: 0;
+  border: 1px solid var(--line);
+}
+
+.pick {
+  background: linear-gradient(135deg, #fffbf5 0%, #fef5ec 100%);
+  border-color: #f0d4b8;
+  position: relative;
+  overflow: hidden;
+}
+
+.pick::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle at 100% 0%, rgba(218, 165, 32, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.pick h3 {
+  margin: 4px 0 12px;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  background: var(--card);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin: 2px 4px 2px 0;
+  border: 1px solid var(--line);
+  color: var(--ink-secondary);
+}
+
+.dists {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+  font-size: 0.875rem;
+}
+
+.dists > div {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line-light);
+}
+
+.dists > div:last-child {
+  border-bottom: none;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.spot {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  transition: all var(--transition-fast);
+}
+
+.spot:hover {
+  border-color: var(--pumpkin);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.rank {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--line-light);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--ink-secondary);
+  flex-shrink: 0;
+}
+
+.spot.top .rank {
+  background: var(--rust);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(194, 75, 43, 0.3);
+}
+
+.spot .meta {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+a {
+  color: var(--rust);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--rust-hover);
+  text-decoration: underline;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--pumpkin);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.note {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: all var(--transition-slow);
+  pointer-events: none;
+  z-index: 2000;
+  box-shadow: var(--shadow-lg);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--muted);
+}
+
+.empty-state-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  margin: 0 0 8px;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+@media (min-width: 860px) {
+  main {
+    grid-template-columns: 400px 1fr;
+  }
+  .span { grid-column: 1 / -1; }
+  #left { grid-row: span 3; }
+}
+
+@media (max-width: 859px) {
+  header {
+    padding: 24px 16px 44px;
+  }
+  
+  main {
+    margin-top: -28px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+  
+  .friend {
+    padding: 12px;
+  }
+  
+  .friend .row {
+    flex-direction: column;
+  }
+  
+  .friend .row > * {
+    width: 100%;
+  }
+  
+  .btns {
+    flex-direction: column;
+  }
+  
+  .btns button {
+    width: 100%;
+  }
+  
+  .pick h3 {
+    font-size: 1.125rem;
+  }
+  
+  .spot {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .rank {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.5rem;
+  }
+  
+  header p {
+    font-size: 0.875rem;
+  }
+  
+  .leaves {
+    font-size: 1.75rem;
+  }
+  
+  main {
+    padding: 0 12px;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  
+  .chips {
+    gap: 6px;
+  }
+  
+  .chip {
+    font-size: 0.75rem;
+    padding: 8px 12px;
+    min-height: 32px;
+  }
+}
+
+.home-ic {
+  background: var(--gold);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.spot-ic {
+  background: var(--moss);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+.extra-ic {
+  background: #9bb07a;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  width: 11px;
+  height: 11px;
+}
+
+.top-ic {
+  background: var(--rust);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  box-shadow: 0 3px 12px rgba(194, 75, 43, 0.4);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.map-legend-dot.home { background: var(--gold); }
+.map-legend-dot.pick { background: var(--rust); }
+.map-legend-dot.curated { background: var(--moss); }
+.map-legend-dot.osm { background: #9bb07a; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--line-light) 25%, var(--line) 50%, var(--line-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+</style>
+</head>
 <body>
-<header><div class="leaves">🍂</div><h1>Where should we walk?</h1><p>November Step Challenge 🥾 Add the crew, and we'll find the fairest trail or park, where nobody drives much farther than anyone else.</p></header>
+<header>
+  <div class="leaves" aria-hidden="true">🍂</div>
+  <h1>Where should we walk?</h1>
+  <p>November Step Challenge 🥾 Add the crew, and we'll find the fairest trail or park, where nobody drives much farther than anyone else.</p>
+</header>
 <main>
-<section class="card" id="left">
-  <h2>👟 Who's walking?</h2>
-  <div id="friends"></div>
-  <div class="btns"><button class="primary" id="add">+ Add a friend</button><button id="copy">🔗 Copy link</button></div>
-  <p class="note">Type any address or landmark, or pick a quick spot. Nothing is stored anywhere; the link holds the group.</p>
-  <div class="label">Type of spot</div>
-  <div class="chips" id="types"></div>
-  <div class="label">Vibe</div>
-  <div class="chips" id="vibes"></div>
-  <div class="label">Daily step goal</div>
-  <div class="chips" id="goals"></div>
-</section>
-<section class="card pick" id="pick"></section>
-<section class="card"><div id="map"></div><p class="note">🟡 homes · 🍁 fairest pick · green dots: our curated spots · small light dots: more parks nearby from OpenStreetMap</p></section>
-<section class="card span"><h2>🗺️ Every spot, fairest first</h2><p class="note">Ranked by the longest drive for anyone. Miles are straight-line; minutes are a rough 2.5 min/mile.</p><div class="list" id="list"></div></section>
-<section class="card span" id="extraCard" hidden><h2>🌳 More parks near the middle</h2><p class="note">Found live from OpenStreetMap. We haven't checked these, so take a look first.</p><div class="list" id="extra"></div></section>
+  <section class="card" id="left">
+    <h2>👟 Who's walking?</h2>
+    <div id="friends" role="list" aria-label="Walking group members"></div>
+    <div class="btns">
+      <button class="primary" id="add" aria-label="Add a friend to the group">+ Add a friend</button>
+      <button id="copy" aria-label="Copy shareable link">🔗 Copy link</button>
+    </div>
+    <p class="note" style="margin-top: 16px;">Type any address or landmark, or pick a quick spot. Nothing is stored anywhere; the link holds the group.</p>
+    <div class="label" id="type-label">Type of spot</div>
+    <div class="chips" id="types" role="group" aria-labelledby="type-label"></div>
+    <div class="label" id="vibe-label">Vibe</div>
+    <div class="chips" id="vibes" role="group" aria-labelledby="vibe-label"></div>
+    <div class="label" id="goal-label">Daily step goal</div>
+    <div class="chips" id="goals" role="group" aria-labelledby="goal-label"></div>
+  </section>
+  <section class="card pick" id="pick" aria-live="polite"></section>
+  <section class="card">
+    <div id="map" role="application" aria-label="Interactive map showing walking locations"></div>
+    <div class="map-legend">
+      <span class="map-legend-item"><span class="map-legend-dot home"></span> Homes</span>
+      <span class="map-legend-item"><span class="map-legend-dot pick"></span> Fairest pick</span>
+      <span class="map-legend-item"><span class="map-legend-dot curated"></span> Curated spots</span>
+      <span class="map-legend-item"><span class="map-legend-dot osm"></span> More parks (OSM)</span>
+    </div>
+  </section>
+  <section class="card span">
+    <h2>🗺️ Every spot, fairest first</h2>
+    <p class="note">Ranked by the longest drive for anyone. Miles are straight-line; minutes are a rough 2.5 min/mile.</p>
+    <div class="list" id="list" role="list" aria-label="Ranked walking spots"></div>
+  </section>
+  <section class="card span" id="extraCard" hidden>
+    <h2>🌳 More parks near the middle</h2>
+    <p class="note">Found live from OpenStreetMap. We haven't checked these, so take a look first.</p>
+    <div class="list" id="extra" role="list" aria-label="Additional parks from OpenStreetMap"></div>
+  </section>
 </main>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const PRESETS=[["Glenview",42.0701,-87.8114],["Northbrook",42.1287,-87.8265],["Wilmette",42.0761,-87.7116],["Winnetka",42.1081,-87.7365],["Evanston",42.047,-87.6846],["Skokie",42.0263,-87.7521],["Highland Park",42.1837,-87.7993],["Deerfield",42.1711,-87.8445],["Lake Forest",42.2586,-87.8407],["Park Ridge",42.0112,-87.8406],["Des Plaines",42.0416,-87.8874],["Niles",42.0289,-87.8122],["Morton Grove",42.0406,-87.7826],["Northfield",42.0998,-87.7809],["Kenilworth",42.0895,-87.7149],["Glencoe",42.135,-87.7581],["Rogers Park (Chicago)",42.009,-87.6768],["Edgewater (Chicago)",41.9834,-87.664],["Andersonville (Chicago)",41.9799,-87.6683],["Lincoln Square (Chicago)",41.9686,-87.6885],["Ravenswood (Chicago)",41.9679,-87.6745],["Lakeview (Chicago)",41.9327,-87.668],["Lincoln Park (Chicago)",41.9217,-87.6478],["📍 The Glen Town Center, Glenview",42.0895,-87.8251],["📍 Glenview Metra",42.0749,-87.806],["📍 Lyon School, Glenview",42.0787,-87.797],["📍 Pleasant Ridge School, Glenview",42.0863,-87.7919],["📍 Glenbrook South HS",42.089,-87.8536],["📍 Glenbrook North HS",42.1119,-87.8337],["📍 Westfield Old Orchard",42.0591,-87.7498],["📍 Northbrook Court",42.1501,-87.8166],["📍 Northwestern University",42.0557,-87.6753],["📍 Evanston Township HS",42.0462,-87.7022],["📍 Bahá'í Temple, Wilmette",42.0744,-87.6843],["📍 Wilmette Metra",42.0774,-87.7093],["📍 New Trier HS, Winnetka",42.0945,-87.7198],["📍 Chicago Botanic Garden",42.1477,-87.7911]];
 const S=(name,town,type,lat,lng,o={})=>({name,town,type,lat,lng,vibes:[],...o});
@@ -124,7 +858,6 @@ let st={friends:[{name:"Stella",place:"Glenview",lat:42.0701,lng:-87.8114},{name
 function loadHash(){try{const h=location.hash.slice(1);if(!h)return;const p=new URLSearchParams(h);const g=p.get("g");if(g){const f=JSON.parse(decodeURIComponent(escape(atob(g.replace(/-/g,"+").replace(/_/g,"/")))));if(Array.isArray(f)&&f.length)st.friends=f.map(x=>({name:x[0]||"",place:x[1]||"",lat:x[2]??null,lng:x[3]??null}));}}catch(e){console.warn("bad hash",e)}}
 function saveHash(){const g=btoa(unescape(encodeURIComponent(JSON.stringify(st.friends.map(f=>[f.name,f.place,f.lat==null?null:+f.lat.toFixed(4),f.lng==null?null:+f.lng.toFixed(4)]))))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");history.replaceState(null,"","#g="+g)}
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),1800)}
-// geocoding
 const cache={};let geoT;
 async function geocode(q){q=q.trim();if(q.length<3)return[];if(cache[q])return cache[q];
  const pre=PRESETS.filter(p=>p[0].toLowerCase().includes(q.toLowerCase())).slice(0,4).map(p=>({label:p[0].replace("📍 ",""),sub:"Quick pick",lat:p[1],lng:p[2]}));
@@ -132,27 +865,30 @@ async function geocode(q){q=q.trim();if(q.length<3)return[];if(cache[q])return c
   try{const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&viewbox=-88.2,42.4,-87.5,41.8&q="+encodeURIComponent(q));const j=await r.json();res=j.map(x=>({label:x.display_name.split(",")[0],sub:x.display_name.split(",").slice(1,4).join(","),lat:+x.lat,lng:+x.lon}));}catch(e2){}}
  return cache[q]=[...pre,...res];}
 function renderFriends(){const box=$("#friends");box.innerHTML="";
- st.friends.forEach((f,i)=>{const d=document.createElement("div");d.className="friend";
-  d.innerHTML=`${st.friends.length>1?'<button class="x" title="Remove">✕</button>':""}
-  <input class="nm" placeholder="Name (e.g. ${["Stella","Jess","Priya","Maya","Dana"][i%5]})" value="${esc(f.name)}" aria-label="Name">
-  <div class="ac"><input class="pl" placeholder="Address, town or landmark…" value="${esc(f.place)}" aria-label="Where from" autocomplete="off"><div class="sugg" hidden></div></div>
-  <div class="row"><select class="qp" aria-label="Quick pick"><option value="">⚡ Quick pick a town or landmark</option>${PRESETS.map((p,k)=>`<option value="${k}">${esc(p[0])}</option>`).join("")}</select><button class="loc">📍 Use my location</button></div>
-  <div class="where">${f.lat!=null?"✓ Got it: "+esc(f.place||"your spot"):"Pick a place so we can do the math"}</div>`;
+ st.friends.forEach((f,i)=>{const d=document.createElement("div");d.className="friend";d.setAttribute("role","listitem");
+  const hasLocation = f.lat!=null;
+  const whereClass = hasLocation ? "where ready" : "where pending";
+  const whereText = hasLocation ? "✓ Got it: "+esc(f.place||"your spot") : "Pick a place so we can do the math";
+  d.innerHTML=`${st.friends.length>1?'<button class="x" type="button" aria-label="Remove '+esc(f.name||"friend "+(i+1))+'">✕</button>':""}
+  <input class="nm" type="text" placeholder="Name (e.g. ${["Stella","Jess","Priya","Maya","Dana"][i%5]})" value="${esc(f.name)}" aria-label="Friend name">
+  <div class="ac"><input class="pl" type="text" placeholder="Address, town or landmark…" value="${esc(f.place)}" aria-label="Starting location" autocomplete="off"><div class="sugg" hidden role="listbox" aria-label="Location suggestions"></div></div>
+  <div class="row"><select class="qp" aria-label="Quick pick location"><option value="">⚡ Quick pick a town or landmark</option>${PRESETS.map((p,k)=>`<option value="${k}">${esc(p[0])}</option>`).join("")}</select><button type="button" class="loc">📍 Use my location</button></div>
+  <div class="${whereClass}">${whereText}</div>`;
   const pl=d.querySelector(".pl"),sg=d.querySelector(".sugg");
   d.querySelector(".nm").oninput=e=>{f.name=e.target.value;saveHash();renderResults()};
   d.querySelector(".x")?.addEventListener("click",()=>{st.friends.splice(i,1);saveHash();renderFriends();renderResults()});
   d.querySelector(".qp").onchange=e=>{const p=PRESETS[e.target.value];if(!p)return;Object.assign(f,{place:p[0].replace("📍 ",""),lat:p[1],lng:p[2]});st.surprise=null;saveHash();renderFriends();renderResults()};
   d.querySelector(".loc").onclick=()=>{if(!navigator.geolocation)return toast("Location isn't available here");toast("Finding you…");navigator.geolocation.getCurrentPosition(p=>{Object.assign(f,{place:"My location",lat:p.coords.latitude,lng:p.coords.longitude});saveHash();renderFriends();renderResults()},()=>toast("Couldn't get your location"))};
-  let items=[];pl.oninput=()=>{clearTimeout(geoT);const q=pl.value;geoT=setTimeout(async()=>{items=await geocode(q);if(pl.value!==q)return;sg.innerHTML=items.map((it,k)=>`<div data-k="${k}">${esc(it.label)}<br><small>${esc(it.sub||"")}</small></div>`).join("");sg.hidden=!items.length},350)};
+  let items=[];pl.oninput=()=>{clearTimeout(geoT);const q=pl.value;geoT=setTimeout(async()=>{items=await geocode(q);if(pl.value!==q)return;sg.innerHTML=items.map((it,k)=>`<div data-k="${k}" role="option">${esc(it.label)}<br><small>${esc(it.sub||"")}</small></div>`).join("");sg.hidden=!items.length},350)};
   pl.onkeydown=e=>{if(e.key==="Enter"&&items[0]){e.preventDefault();choose(items[0])}};
   const choose=it=>{Object.assign(f,{place:it.label,lat:it.lat,lng:it.lng});st.surprise=null;saveHash();renderFriends();renderResults()};
   sg.onmousedown=e=>{const t=e.target.closest("[data-k]");if(t){e.preventDefault();choose(items[+t.dataset.k])}};
   pl.onblur=()=>setTimeout(()=>sg.hidden=true,150);
   box.appendChild(d)})}
 function chips(){
- $("#types").innerHTML=TYPES.map(t=>`<button class="chip ${st.type===t?"on":""}" data-t="${t}">${t}</button>`).join("");
- $("#vibes").innerHTML=VIBES.map(v=>`<button class="chip ${st.vibes.includes(v)?"on":""}" data-v="${v}">${v}</button>`).join("");
- $("#goals").innerHTML=[5000,10000,15000].map(g=>`<button class="chip ${st.goal===g?"on":""}" data-g="${g}">${g/1000}k steps</button>`).join("");}
+ $("#types").innerHTML=TYPES.map(t=>`<button type="button" class="chip ${st.type===t?"on":""}" data-t="${t}" aria-pressed="${st.type===t}">${t}</button>`).join("");
+ $("#vibes").innerHTML=VIBES.map(v=>`<button type="button" class="chip ${st.vibes.includes(v)?"on":""}" data-v="${v}" aria-pressed="${st.vibes.includes(v)}">${v}</button>`).join("");
+ $("#goals").innerHTML=[5000,10000,15000].map(g=>`<button type="button" class="chip ${st.goal===g?"on":""}" data-g="${g}" aria-pressed="${st.goal===g}">${g/1000}k steps</button>`).join("");}
 document.addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;if(c.dataset.t)st.type=c.dataset.t;if(c.dataset.v){const v=c.dataset.v;st.vibes=st.vibes.includes(v)?st.vibes.filter(x=>x!==v):[...st.vibes,v]}if(c.dataset.g)st.goal=+c.dataset.g;if(!c.dataset.g)st.surprise=null;chips();renderResults()});
 const located=()=>st.friends.filter(f=>f.lat!=null);
 function ranked(){const fr=located();return SPOTS.filter(s=>st.type==="All"||s.type===st.type).filter(s=>st.vibes.every(v=>v==="Paved"?s.surface==="Paved":s.vibes.includes(v))).map(s=>{const d=fr.map(f=>mi(f.lat,f.lng,s.lat,s.lng));return{s,d,max:Math.max(...d),avg:d.reduce((a,b)=>a+b,0)/d.length}}).sort((a,b)=>a.max-b.max||a.avg-b.avg)}
@@ -163,19 +899,19 @@ const icon=(c,h="")=>L.divIcon({className:"",html:`<div class="${c}">${h}</div>`
 function renderResults(){const fr=located(),R=fr.length?ranked():[];
  let top=R[0];if(st.surprise){const f=R.find(r=>r.s.name===st.surprise);if(f)top=f}
  const pk=$("#pick");
- if(!fr.length)pk.innerHTML=`<h2>🍁 Your pick will appear here</h2><p>Add where at least one walker is coming from.</p>`;
- else if(!top)pk.innerHTML=`<h2>😅 Too picky!</h2><p>No spot matches all those filters. Turn a vibe or two off.</p>`;
+ if(!fr.length)pk.innerHTML=`<div class="empty-state"><div class="empty-state-icon">🍁</div><h3>Your pick will appear here</h3><p>Add where at least one walker is coming from.</p></div>`;
+ else if(!top)pk.innerHTML=`<div class="empty-state"><div class="empty-state-icon">😅</div><h3>Too picky!</h3><p>No spot matches all those filters. Try turning off a vibe or two.</p></div>`;
  else{const s=top.s;pk.innerHTML=`<div class="note">${st.surprise?"🎲 Surprise pick!":"🏆 Fairest spot for the group"}</div><h3>Let's walk at ${esc(s.name)}!</h3>
  <div><span class="pill">${esc(s.town)}</span><span class="pill">${s.type}</span>${s.surface?`<span class="pill">${s.surface}</span>`:""}${s.vibes.map(v=>`<span class="pill">${v}</span>`).join("")}</div>
  <div class="dists">${fr.map((f,i)=>`<div>👟 <b>${esc(f.name||"Friend "+(st.friends.indexOf(f)+1))}</b> · ${fmt(top.d[i])}</div>`).join("")}</div>
- <p>🎯 ${stepLine(s)} (2,000 steps a mile).${s.note?" "+esc(s.note):""}${s.parking?" 🅿️ "+esc(s.parking)+".":""}</p>
- <div class="btns"><a href="${dir(s.lat,s.lng)}" target="_blank" rel="noopener"><button class="primary">🧭 Directions</button></a><button class="gold" id="surp">🎲 Surprise me</button></div>`;
+ <p style="margin: 0 0 16px; font-size: 0.875rem; line-height: 1.6;">🎯 ${stepLine(s)} (2,000 steps a mile).${s.note?" "+esc(s.note):""}${s.parking?" 🅿️ "+esc(s.parking)+".":""}</p>
+ <div class="btns" style="margin-top: 0;"><a href="${dir(s.lat,s.lng)}" target="_blank" rel="noopener"><button type="button" class="primary">🧭 Directions</button></a><button type="button" class="gold" id="surp">🎲 Surprise me</button></div>`;
  $("#surp").onclick=()=>{const pool=R.slice(0,8).filter(r=>r.s.name!==top.s.name);if(!pool.length)return;st.surprise=pool[Math.floor(Math.random()*pool.length)].s.name;renderResults()}}
- $("#list").innerHTML=R.map((r,i)=>`<div class="spot ${r===top?"top":""}"><div class="rank">${i+1}</div><div><b>${esc(r.s.name)}</b> <span class="meta">· ${esc(r.s.town)} · ${r.s.type}${r.s.surface?" · "+r.s.surface:""}</span><div class="meta">Longest drive ${fmt(r.max)} · avg ${r.avg.toFixed(1)} mi · ${r.s.loop?Math.ceil(st.goal/2000/r.s.loop*10)/10+" laps":st.goal/2000+" mi"} for ${st.goal/1000}k</div><a href="${maps(r.s.name,r.s.town)}" target="_blank" rel="noopener">Open in Google Maps →</a></div></div>`).join("")||`<p class="note">Add a walker to see the ranking.</p>`;
+ $("#list").innerHTML=R.map((r,i)=>`<div class="spot ${r===top?"top":""}" role="listitem"><div class="rank">${i+1}</div><div><b>${esc(r.s.name)}</b> <span class="meta">· ${esc(r.s.town)} · ${r.s.type}${r.s.surface?" · "+r.s.surface:""}</span><div class="meta">Longest drive ${fmt(r.max)} · avg ${r.avg.toFixed(1)} mi · ${r.s.loop?Math.ceil(st.goal/2000/r.s.loop*10)/10+" laps":st.goal/2000+" mi"} for ${st.goal/1000}k</div><a href="${maps(r.s.name,r.s.town)}" target="_blank" rel="noopener">Open in Google Maps →</a></div></div>`).join("")||`<div class="empty-state"><div class="empty-state-icon">🗺️</div><p>Add a walker to see the ranking.</p></div>`;
  if(!map)return;layer.clearLayers();const b=[];
  R.forEach(r=>{if(r===top)return;L.marker([r.s.lat,r.s.lng],{icon:icon("spot-ic")}).bindPopup(`<b>${esc(r.s.name)}</b><br>Longest drive ${fmt(r.max)}`).addTo(layer)});
  fr.forEach(f=>{L.marker([f.lat,f.lng],{icon:icon("home-ic","🏠")}).bindPopup(esc(f.name||"Friend")+": "+esc(f.place)).addTo(layer);b.push([f.lat,f.lng])});
- if(top){L.marker([top.s.lat,top.s.lng],{icon:icon("top-ic","🍁"),zIndexOffset:1000}).bindPopup(`<b>${esc(top.s.name)}</b>`).addTo(layer);b.push([top.s.lat,top.s.lng]);fr.forEach(f=>L.polyline([[f.lat,f.lng],[top.s.lat,top.s.lng]],{color:"#c2532b",weight:2,dashArray:"6 6",opacity:.7}).addTo(layer))}
+ if(top){L.marker([top.s.lat,top.s.lng],{icon:icon("top-ic","🍁"),zIndexOffset:1000}).bindPopup(`<b>${esc(top.s.name)}</b>`).addTo(layer);b.push([top.s.lat,top.s.lng]);fr.forEach(f=>L.polyline([[f.lat,f.lng],[top.s.lat,top.s.lng]],{color:"#c24b2b",weight:2,dashArray:"6 6",opacity:.7}).addTo(layer))}
  if(b.length)map.fitBounds(b,{padding:[40,40],maxZoom:13});
  fetchExtra(fr)}
 let extraKey="";async function fetchExtra(fr){if(!fr.length)return;const lat=fr.reduce((a,f)=>a+f.lat,0)/fr.length,lng=fr.reduce((a,f)=>a+f.lng,0)/fr.length,key=lat.toFixed(3)+","+lng.toFixed(3);if(key===extraKey)return;extraKey=key;
@@ -185,10 +921,12 @@ let extraKey="";async function fetchExtra(fr){if(!fr.length)return;const lat=fr.
   const ex=j.elements.map(e=>({name:e.tags.name,lat:e.center?.lat,lng:e.center?.lon,kind:e.tags.leisure==="nature_reserve"?"Nature reserve":"Park"})).filter(e=>e.lat&&!seen.has(e.name)&&seen.add(e.name)&&![...known].some(k=>k.includes(e.name.toLowerCase())))
    .map(e=>({...e,max:Math.max(...located().map(f=>mi(f.lat,f.lng,e.lat,e.lng)))})).sort((a,b)=>a.max-b.max).slice(0,12);
   if(!ex.length)return;$("#extraCard").hidden=false;
-  $("#extra").innerHTML=ex.map(e=>`<div class="spot"><div class="rank">🌳</div><div><b>${esc(e.name)}</b> <span class="meta">· ${e.kind}</span><div class="meta">Longest drive ${fmt(e.max)}</div><a href="${dir(e.lat,e.lng)}" target="_blank" rel="noopener">Directions →</a></div></div>`).join("");
+  $("#extra").innerHTML=ex.map(e=>`<div class="spot" role="listitem"><div class="rank">🌳</div><div><b>${esc(e.name)}</b> <span class="meta">· ${e.kind}</span><div class="meta">Longest drive ${fmt(e.max)}</div><a href="${dir(e.lat,e.lng)}" target="_blank" rel="noopener">Directions →</a></div></div>`).join("");
   ex.forEach(e=>L.marker([e.lat,e.lng],{icon:icon("extra-ic")}).bindPopup(esc(e.name)).addTo(layer));
  }catch(e){$("#extraCard").hidden=true}}
 $("#add").onclick=()=>{st.friends.push({name:"",place:"",lat:null,lng:null});saveHash();renderFriends();setTimeout(()=>[...document.querySelectorAll(".nm")].pop().focus(),0)};
 $("#copy").onclick=async()=>{saveHash();try{await navigator.clipboard.writeText(location.href);toast("Link copied! Send it to the crew 🍂")}catch(e){prompt("Copy this link:",location.href)}};
 loadHash();chips();renderFriends();try{initMap()}catch(e){console.warn("map failed",e)}saveHash();renderResults();
-</script></body></html>
+</script>
+</body>
+</html>
